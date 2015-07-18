@@ -17,23 +17,25 @@
 $(function() {
 	var token = "<%= @token %>";
 	var milkcocoa = new MilkCocoa("uniiaxclo10.mlkcca.com");
-	var ds = milkcocoa.dataStore("message");
+
 	if(token) {
-		milkcocoa.authWithToken(token, function() {
-			init();
+		milkcocoa.authWithToken(token, function(err, user) {
+			init(user.name);
 		});		
 	}else{
 		milkcocoa.user(function(err, user) {
 			if(user) {
 				$("#user").html(user.name);
-				init();
+				init(user.name);
 			} else {
 				$("#user").html("ログインしてください。");
 			}
 		});
 
 	}
-	function init() {
+	function init(username) {
+		if(!username) throw new Error("invalid username");
+		var ds = milkcocoa.dataStore("message").child(username);
 		ds.stream().next(function(err, messages) {
 			messages.forEach(function(m) {
 				$("#messages").append("<div>"+m.value.content+"</div>");
@@ -42,14 +44,14 @@ $(function() {
 		ds.on("push", function(pushed) {
 			$("#messages").append("<div>"+pushed.value.content+"</div>");
 		});
+		$("#post").click(function() {
+			var content = $("#content").val();
+			if(content) {
+				ds.push({
+					content : content
+				});
+			}
+		});
 	}
-	$("#post").click(function() {
-		var content = $("#content").val();
-		if(content) {
-			ds.push({
-				content : content
-			});
-		}
-	});
 });
 </script>
