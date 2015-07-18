@@ -1,0 +1,55 @@
+<%= @msg %><br>
+<%= form_tag('/') do %>
+ユーザー名：<%= text_field_tag :name %><br>
+パスワード：<%= text_field_tag :pass %><br>
+<%= submit_tag 'ログイン' %><br>
+<% end %>
+<hr>
+<div>
+	<div id="user"></div>
+	<input id="content" type="text">
+	<button id="post">投稿</button>
+	<div id="messages"></div>
+</div>
+<script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src='https://cdn.mlkcca.com/v2.0.0/milkcocoa.js'></script>
+<script>
+$(function() {
+	var token = "<%= @token %>";
+	var milkcocoa = new MilkCocoa("uniiaxclo10.mlkcca.com");
+	var ds = milkcocoa.dataStore("message");
+	if(token) {
+		milkcocoa.authWithToken(token, function() {
+			init();
+		});		
+	}else{
+		milkcocoa.user(function(err, user) {
+			if(user) {
+				$("#user").html(user.name);
+				init();
+			} else {
+				$("#user").html("ログインしてください。");
+			}
+		});
+
+	}
+	function init() {
+		ds.stream().next(function(err, messages) {
+			messages.forEach(function(m) {
+				$("#messages").append("<div>"+m.value.content+"</div>");
+			});
+		});
+		ds.on("push", function(pushed) {
+			$("#messages").append("<div>"+pushed.value.content+"</div>");
+		});
+	}
+	$("#post").click(function() {
+		var content = $("#content").val();
+		if(content) {
+			ds.push({
+				content : content
+			});
+		}
+	});
+});
+</script>
