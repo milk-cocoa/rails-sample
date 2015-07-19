@@ -32,10 +32,13 @@ $(function() {
 	var milkcocoa = new MilkCocoa("{your app id}.mlkcca.com");
 
 	if(token) {
+		//Tokenがある場合はMilkcocoaにTokenを渡す
 		milkcocoa.authWithToken(token, function(err, user) {
+			//location.reloadの方が安定するかも？
 			init(user.name);
 		});		
 	}else{
+		//Tokenがない場合はMilkcocoaにログイン済みか問い合わせる
 		milkcocoa.user(function(err, user) {
 			if(user) {
 				$("#login-view").addClass("deactive")
@@ -45,7 +48,6 @@ $(function() {
 				$("#user").html("ログインしてください。");
 			}
 		});
-
 	}
 	function init(username) {
 		if(!username) throw new Error("invalid username");
