@@ -1,22 +1,35 @@
+<div id="login-view" class="login-view">
 <%= @msg %><br>
 <%= form_tag('/') do %>
 ユーザー名：<%= text_field_tag :name %><br>
 パスワード：<%= text_field_tag :pass %><br>
 <%= submit_tag 'ログイン' %><br>
 <% end %>
-<hr>
+</div>
 <div>
-	<div id="user"></div>
-	<input id="content" type="text">
-	<button id="post">投稿</button>
-	<div id="messages"></div>
+	<div class="header">
+        <h1 class="logo"><span id="user"></span> CHAT</h1><a id="logout-btn" class="ogout-btn">ログアウト</a>
+    </div>
+
+    <div class="container">
+        <div class="postarea cf">
+            <div class="postarea-text">
+                <textarea name="" id="content" cols="30" rows="10" placeholder="Enterで投稿"></textarea>
+            </div>
+            <button id="post" class="postarea-button">投稿する</button>
+        </div>
+    </div>
+
+    <div id="messages" class="content">
+        <div id="dummy"></div>
+    </div>
 </div>
 <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src='https://cdn.mlkcca.com/v2.0.0/milkcocoa.js'></script>
 <script>
 $(function() {
 	var token = "<%= @token %>";
-	var milkcocoa = new MilkCocoa("uniiaxclo10.mlkcca.com");
+	var milkcocoa = new MilkCocoa("{your app id}.mlkcca.com");
 
 	if(token) {
 		milkcocoa.authWithToken(token, function(err, user) {
@@ -25,6 +38,7 @@ $(function() {
 	}else{
 		milkcocoa.user(function(err, user) {
 			if(user) {
+				$("#login-view").addClass("deactive")
 				$("#user").html(user.name);
 				init(user.name);
 			} else {
@@ -44,14 +58,29 @@ $(function() {
 		ds.on("push", function(pushed) {
 			$("#messages").append("<div>"+pushed.value.content+"</div>");
 		});
-		$("#post").click(function() {
+		function post() {
 			var content = $("#content").val();
 			if(content) {
 				ds.push({
 					content : content
 				});
-			}
+				$("#content").val("");
+			}			
+		}
+		$("#post").click(function() {
+            post();
 		});
+		$('#content').keydown(function (e) {
+            if (e.which == 13){
+                post();
+                return false;
+            }
+        });
+        $("#logout-btn").click(function(e) {
+        	milkcocoa.logout(function() {
+        		location.reload();
+        	});
+        })
 	}
 });
 </script>

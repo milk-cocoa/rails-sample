@@ -6,7 +6,7 @@ class SampleController < ApplicationController
   	if params.key?(:name) || params.key?(:pass)
   		exp = Time.now.to_i + 4 * 3600
   		payload = {:name => params[:name], :exp => exp }
-  		hmac_secret = '{milkcocoa-secret}'
+  		hmac_secret = '{your secret key}'
   		token = JWT.encode payload, hmac_secret, 'HS256'
   		@msg = 'Logged in as ' + params[:name]
   		@token = token
